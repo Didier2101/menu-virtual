@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { X, Trash2, Plus, Minus, MapPin, Utensils } from "lucide-react";
 import Swal from "sweetalert2";
 import type { CartItem } from "../App";
-import { mesasDisponibles, type Mesa } from "../data/mesas"; // Importar desde el archivo mesas
+import { mesasDisponibles, type Mesa } from "../data/mesas";
 
 interface Props {
     open: boolean;
@@ -86,7 +86,6 @@ export default function CartModal({
         window.open(`https://wa.me/573028645014?text=${message}`, '_blank');
     };
 
-    // Confirmar eliminación de un producto
     const confirmRemove = (id: string) => {
         Swal.fire({
             title: "¿Eliminar producto?",
@@ -105,7 +104,6 @@ export default function CartModal({
         });
     };
 
-    // Confirmar limpiar carrito
     const confirmClear = () => {
         Swal.fire({
             title: "¿Vaciar carrito?",
@@ -126,16 +124,8 @@ export default function CartModal({
 
     const handleServiceTypeChange = (type: ServiceType) => {
         setServiceType(type);
-        // Limpiar errores al cambiar tipo de servicio
         setErrors({ name: false, location: false });
     };
-
-    // const handleMesaSelection = (mesa: Mesa) => {
-    //     if (mesa.disponible) {
-    //         setSelectedMesa(mesa);
-    //         if (errors.location) setErrors({ ...errors, location: false });
-    //     }
-    // };
 
     return (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
@@ -150,257 +140,271 @@ export default function CartModal({
                 }}
                 initial={{ y: 200, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="relative w-full md:max-w-md bg-white rounded-t-3xl md:rounded-3xl p-4 shadow-2xl max-h-[90vh] overflow-y-auto hide-scrollbar"
+                className="relative w-full md:max-w-md bg-white rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col"
+                style={{
+                    height: 'min(90vh, 700px)', // Altura máxima fija
+                    minHeight: '60vh' // Altura mínima
+                }}
             >
-                {/* Barra para arrastrar en móviles */}
-                <div className="md:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
+                {/* Header fijo */}
+                <div className="flex-shrink-0 p-4 border-b border-gray-100">
+                    {/* Barra para arrastrar en móviles */}
+                    <div className="md:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
 
-                {/* Botón cerrar para desktop */}
-                <button
-                    onClick={onClose}
-                    className="hidden md:block absolute right-5 top-5 text-gray-500 hover:text-gray-700"
-                >
-                    <X size={24} />
-                </button>
+                    {/* Botón cerrar para desktop */}
+                    <button
+                        onClick={onClose}
+                        className="hidden md:block absolute right-5 top-5 text-gray-500 hover:text-gray-700"
+                    >
+                        <X size={24} />
+                    </button>
 
-                <h2 className="text-2xl font-bold mb-5 text-gray-900">🛍️ Tu pedido</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">🛍️ Tu pedido</h2>
+                </div>
 
                 {items.length === 0 ? (
-                    <p className="text-gray-600 text-center">Tu carrito está vacío 🍽️</p>
+                    <div className="flex-1 flex items-center justify-center">
+                        <p className="text-gray-600 text-center">Tu carrito está vacío 🍽️</p>
+                    </div>
                 ) : (
                     <>
-                        {/* Lista productos */}
-                        <ul className="rounded-xl bg-gray-50">
-                            {items.map((item) => (
-                                <li
-                                    key={item.product.id}
-                                    className="flex justify-between items-center py-3 px-3"
-                                >
-                                    <div>
-                                        <span className="font-medium text-gray-900">{item.product.nombre}</span>
-                                        <span className="ml-1 text-sm text-gray-500">x{item.quantity}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        {/* Botones -/+ */}
-                                        <div className="flex items-center gap-1">
+                        {/* Contenido scrolleable */}
+                        <div className="flex-1 overflow-y-auto px-4 py-2">
+                            {/* Lista productos */}
+                            <ul className="rounded-xl bg-gray-50 mb-4">
+                                {items.map((item) => (
+                                    <li
+                                        key={item.product.id}
+                                        className="flex justify-between items-center py-3 px-3"
+                                    >
+                                        <div>
+                                            <span className="font-medium text-gray-900">{item.product.nombre}</span>
+                                            <span className="ml-1 text-sm text-gray-500">x{item.quantity}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {/* Botones -/+ */}
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() =>
+                                                        onUpdateQuantity(String(item.product.id), item.quantity - 1)
+                                                    }
+                                                    className="p-1 bg-gray-200 rounded-full hover:bg-gray-300"
+                                                >
+                                                    <Minus size={14} />
+                                                </button>
+                                                <span className="px-2">{item.quantity}</span>
+                                                <button
+                                                    onClick={() =>
+                                                        onUpdateQuantity(String(item.product.id), item.quantity + 1)
+                                                    }
+                                                    className="p-1 bg-green-600 text-white rounded-full hover:bg-green-700"
+                                                >
+                                                    <Plus size={14} />
+                                                </button>
+                                            </div>
+
+                                            {/* Precio */}
+                                            <span className="font-semibold text-green-600">
+                                                ${(item.product.precio * item.quantity).toLocaleString()}
+                                            </span>
+
+                                            {/* Eliminar */}
                                             <button
-                                                onClick={() =>
-                                                    onUpdateQuantity(String(item.product.id), item.quantity - 1)
-                                                }
-                                                className="p-1 bg-gray-200 rounded-full hover:bg-gray-300"
+                                                onClick={() => confirmRemove(String(item.product.id))}
+                                                className="text-red-500 hover:text-red-700 ml-3"
                                             >
-                                                <Minus size={14} />
-                                            </button>
-                                            <span className="px-2">{item.quantity}</span>
-                                            <button
-                                                onClick={() =>
-                                                    onUpdateQuantity(String(item.product.id), item.quantity + 1)
-                                                }
-                                                className="p-1 bg-green-600 text-white rounded-full hover:bg-green-700"
-                                            >
-                                                <Plus size={14} />
+                                                <Trash2 size={18} />
                                             </button>
                                         </div>
+                                    </li>
+                                ))}
+                            </ul>
 
-                                        {/* Precio */}
-                                        <span className="font-semibold text-green-600">
-                                            ${(item.product.precio * item.quantity).toLocaleString()}
-                                        </span>
-
-                                        {/* Eliminar */}
-                                        <button
-                                            onClick={() => confirmRemove(String(item.product.id))}
-                                            className="text-red-500 hover:text-red-700 ml-3"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                            {/* Totales */}
+                            <div className="space-y-2 font-semibold bg-gray-50 rounded-xl p-4 shadow-inner mb-4">
+                                <div className="flex justify-between text-gray-700">
+                                    <span>Subtotal</span>
+                                    <span>${subtotal.toLocaleString()}</span>
+                                </div>
+                                {serviceType === "domicilio" && (
+                                    <div className="flex justify-between text-red-500">
+                                        <span>+ Domicilio</span>
+                                        <span>${deliveryFee.toLocaleString()}</span>
                                     </div>
-                                </li>
-                            ))}
-                        </ul>
-
-                        {/* Totales */}
-                        <div className="mt-5 space-y-2 font-semibold bg-gray-50 rounded-xl p-4 shadow-inner">
-                            <div className="flex justify-between text-gray-700">
-                                <span>Subtotal</span>
-                                <span>${subtotal.toLocaleString()}</span>
-                            </div>
-                            {serviceType === "domicilio" && (
-                                <div className="flex justify-between text-red-500">
-                                    <span>+ Domicilio</span>
-                                    <span>${deliveryFee.toLocaleString()}</span>
-                                </div>
-                            )}
-                            {tip > 0 && (
-                                <div className="flex justify-between text-gray-600">
-                                    <span>+ Propina</span>
-                                    <span>${tip.toLocaleString()}</span>
-                                </div>
-                            )}
-                            <div className="flex justify-between text-lg text-gray-900">
-                                <span>Total</span>
-                                <span>${total.toLocaleString()}</span>
-                            </div>
-                        </div>
-
-                        {/* Tipo de servicio */}
-                        <div className="mt-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                📍 Tipo de servicio
-                            </label>
-                            <div className="flex gap-2 mb-4">
-                                <button
-                                    onClick={() => handleServiceTypeChange("mesa")}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "mesa"
-                                        ? "bg-green-600 text-white"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                        }`}
-                                >
-                                    <Utensils size={16} />
-                                    En el local
-                                </button>
-                                <button
-                                    onClick={() => handleServiceTypeChange("domicilio")}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "domicilio"
-                                        ? "bg-green-600 text-white"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                        }`}
-                                >
-                                    <MapPin size={16} />
-                                    A domicilio
-                                </button>
-                            </div>
-                        </div>
-
-                        {serviceType === "mesa" ? (
-                            <div className="mt-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    🍽️ Selecciona tu mesa
-                                </label>
-                                <select
-                                    value={selectedMesa?.id || ""}
-                                    onChange={(e) => {
-                                        const mesa = mesasDisponibles.find(m => m.id === e.target.value);
-                                        if (mesa && mesa.disponible) {
-                                            setSelectedMesa(mesa);
-                                            if (errors.location) setErrors({ ...errors, location: false });
-                                        }
-                                    }}
-                                    className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
-                                >
-                                    <option value="">Selecciona una mesa</option>
-                                    {mesasDisponibles.map((mesa) => (
-                                        <option key={mesa.id} value={mesa.id} disabled={!mesa.disponible}>
-                                            {mesa.nombre} {mesa.disponible ? "" : "✗"}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.location && <p className="text-red-500 text-xs mt-2">Debes seleccionar una mesa</p>}
-                                {selectedMesa && (
-                                    <p className="text-green-600 text-sm mt-2">
-                                        Mesa seleccionada: <strong>{selectedMesa.nombre}</strong>
-                                    </p>
                                 )}
+                                {tip > 0 && (
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>+ Propina</span>
+                                        <span>${tip.toLocaleString()}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between text-lg text-gray-900">
+                                    <span>Total</span>
+                                    <span>${total.toLocaleString()}</span>
+                                </div>
                             </div>
-                        ) : (
-                            <div className="mt-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    📍 Dirección de entrega
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Tu dirección *"
-                                    value={address}
-                                    onChange={(e) => {
-                                        setAddress(e.target.value);
-                                        if (errors.location) setErrors({ ...errors, location: false });
-                                    }}
-                                    className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
-                                />
-                                {errors.location && <p className="text-red-500 text-xs mt-1">La dirección es requerida</p>}
-                            </div>
-                        )}
 
-                        {/* Propina */}
-                        <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                🙏 Agregar propina
-                            </label>
-                            <div className="flex gap-2 mb-2">
-                                {[1000, 2000, 5000].map((val) => (
+                            {/* Tipo de servicio */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    📍 Tipo de servicio
+                                </label>
+                                <div className="flex gap-2 mb-4">
                                     <button
-                                        key={val}
-                                        onClick={() => setTip(val)}
-                                        className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${tip === val
-                                            ? "bg-green-600 text-white border-green-600"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        onClick={() => handleServiceTypeChange("mesa")}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "mesa"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                             }`}
                                     >
-                                        +${val.toLocaleString()}
+                                        <Utensils size={16} />
+                                        En el local
                                     </button>
-                                ))}
+                                    <button
+                                        onClick={() => handleServiceTypeChange("domicilio")}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "domicilio"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                            }`}
+                                    >
+                                        <MapPin size={16} />
+                                        A domicilio
+                                    </button>
+                                </div>
                             </div>
-                            <input
-                                type="number"
-                                min={0}
-                                placeholder="Otra cantidad"
-                                value={tip || ""}
-                                onChange={(e) => setTip(Number(e.target.value) || 0)}
-                                className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                            />
-                        </div>
 
-                        {/* Formulario */}
-                        <div className="mt-6 space-y-3">
-                            <div>
+                            {serviceType === "mesa" ? (
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        🍽️ Selecciona tu mesa
+                                    </label>
+                                    <select
+                                        value={selectedMesa?.id || ""}
+                                        onChange={(e) => {
+                                            const mesa = mesasDisponibles.find(m => m.id === e.target.value);
+                                            if (mesa && mesa.disponible) {
+                                                setSelectedMesa(mesa);
+                                                if (errors.location) setErrors({ ...errors, location: false });
+                                            }
+                                        }}
+                                        className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
+                                    >
+                                        <option value="">Selecciona una mesa</option>
+                                        {mesasDisponibles.map((mesa) => (
+                                            <option key={mesa.id} value={mesa.id} disabled={!mesa.disponible}>
+                                                {mesa.nombre} {mesa.disponible ? "" : "✗"}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.location && <p className="text-red-500 text-xs mt-2">Debes seleccionar una mesa</p>}
+                                    {selectedMesa && (
+                                        <p className="text-green-600 text-sm mt-2">
+                                            Mesa seleccionada: <strong>{selectedMesa.nombre}</strong>
+                                        </p>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        📍 Dirección de entrega
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="Tu dirección *"
+                                        value={address}
+                                        onChange={(e) => {
+                                            setAddress(e.target.value);
+                                            if (errors.location) setErrors({ ...errors, location: false });
+                                        }}
+                                        className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
+                                    />
+                                    {errors.location && <p className="text-red-500 text-xs mt-1">La dirección es requerida</p>}
+                                </div>
+                            )}
+
+                            {/* Propina */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    🙏 Agregar propina
+                                </label>
+                                <div className="flex gap-2 mb-2">
+                                    {[1000, 2000, 5000].map((val) => (
+                                        <button
+                                            key={val}
+                                            onClick={() => setTip(val)}
+                                            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${tip === val
+                                                    ? "bg-green-600 text-white border-green-600"
+                                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                }`}
+                                        >
+                                            +${val.toLocaleString()}
+                                        </button>
+                                    ))}
+                                </div>
                                 <input
-                                    type="text"
-                                    placeholder="Tu nombre *"
-                                    value={name}
-                                    onChange={(e) => {
-                                        setName(e.target.value);
-                                        if (errors.name) setErrors({ ...errors, name: false });
-                                    }}
-                                    className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
-                                    required
+                                    type="number"
+                                    min={0}
+                                    placeholder="Otra cantidad"
+                                    value={tip || ""}
+                                    onChange={(e) => setTip(Number(e.target.value) || 0)}
+                                    className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
                                 />
-                                {errors.name && <p className="text-red-500 text-xs mt-1">El nombre es requerido</p>}
                             </div>
 
-                            <textarea
-                                placeholder="Instrucciones (ej: casa verde, segundo piso...)"
-                                value={instructions}
-                                onChange={(e) => setInstructions(e.target.value)}
-                                className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                            />
-                            <select
-                                value={payment}
-                                onChange={(e) => setPayment(e.target.value)}
-                                className="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-green-500 outline-none"
-                            >
-                                <option>Efectivo</option>
-                                <option>Tarjeta</option>
-                                <option>Nequi</option>
-                                <option>Daviplata</option>
-                                <option>Llave</option>
-                            </select>
+                            {/* Formulario */}
+                            <div className="space-y-3 mb-6">
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="Tu nombre *"
+                                        value={name}
+                                        onChange={(e) => {
+                                            setName(e.target.value);
+                                            if (errors.name) setErrors({ ...errors, name: false });
+                                        }}
+                                        className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
+                                        required
+                                    />
+                                    {errors.name && <p className="text-red-500 text-xs mt-1">El nombre es requerido</p>}
+                                </div>
+
+                                <textarea
+                                    placeholder="Instrucciones (ej: casa verde, segundo piso...)"
+                                    value={instructions}
+                                    onChange={(e) => setInstructions(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                                />
+                                <select
+                                    value={payment}
+                                    onChange={(e) => setPayment(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-green-500 outline-none"
+                                >
+                                    <option>Efectivo</option>
+                                    <option>Tarjeta</option>
+                                    <option>Nequi</option>
+                                    <option>Daviplata</option>
+                                    <option>Llave</option>
+                                </select>
+                            </div>
                         </div>
 
-                        {/* Botones */}
-                        <div className="mt-6 flex flex-col gap-3">
-                            <a
-                                href="#"
-                                onClick={handleWhatsAppClick}
-                                className="block bg-green-600 hover:bg-green-700 transition text-white text-center py-3 rounded-xl font-semibold shadow-lg"
-                            >
-                                {serviceType === "domicilio" ? "Pedir a domicilio" : "Pedir en local"}
-                            </a>
-                            <button
-                                onClick={confirmClear}
-                                className="block bg-gray-200 hover:bg-gray-300 transition text-gray-700 text-center py-3 rounded-xl font-semibold"
-                            >
-                                Vaciar carrito
-                            </button>
+                        {/* Botones fijos en la parte inferior */}
+                        <div className="flex-shrink-0 p-4 bg-white border-t border-gray-100">
+                            <div className="flex flex-col gap-3">
+                                <a
+                                    href="#"
+                                    onClick={handleWhatsAppClick}
+                                    className="block bg-green-600 hover:bg-green-700 transition text-white text-center py-3 rounded-xl font-semibold shadow-lg"
+                                >
+                                    {serviceType === "domicilio" ? "Pedir a domicilio" : "Pedir en local"}
+                                </a>
+                                <button
+                                    onClick={confirmClear}
+                                    className="block bg-gray-200 hover:bg-gray-300 transition text-gray-700 text-center py-3 rounded-xl font-semibold"
+                                >
+                                    Vaciar carrito
+                                </button>
+                            </div>
                         </div>
                     </>
                 )}
