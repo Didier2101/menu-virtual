@@ -8,7 +8,7 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas fritas, salchichas y salsas rosada y mostaza.",
     descripcionLarga: "Fotografía ultra realista en primer plano de una porción de salchipapas clásicas servidas en una bandeja de madera rústica. Papas fritas doradas y crujientes, salchichas en rodajas doradas a la plancha, coronadas con un zigzag de salsa rosada y mostaza amarilla brillante. Texturas nítidas, papas crocantes y salchichas jugosas.",
     precio: 15000,
-    imagen: "/assets/salchipapas/clasica.png",
+    imagen: "/assets/salchipapas/clasica.webp",
   },
   {
     id: 20,
@@ -17,7 +17,7 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas fritas, salchichas y abundante queso cheddar fundido.",
     descripcionLarga: "Salchipapas con papas fritas doradas, salchichas en rodajas, cubiertas con abundante queso cheddar fundido derramándose sobre las papas y salsa blanca cremosa. Texturas cremosas y crocantes.",
     precio: 17000,
-    imagen: "/assets/salchipapas/queso.png",
+    imagen: "/assets/salchipapas/queso.webp",
   },
   {
     id: 21,
@@ -26,7 +26,7 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas fritas, salchichas y huevo frito con yema brillante.",
     descripcionLarga: "Salchipapas con papas fritas crujientes, salchichas doradas, acompañadas de un huevo frito con la yema amarilla brillante encima, salsas variadas en zigzag. Combinación perfecta de texturas y sabores.",
     precio: 16000,
-    imagen: "/assets/salchipapas/huevo.png",
+    imagen: "/assets/salchipapas/huevo.webp",
   },
   {
     id: 22,
@@ -35,7 +35,7 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas fritas, salchichas, chorizo, pollo y queso rallado.",
     descripcionLarga: "Salchipapas mixtas con papas fritas doradas, salchichas en rodajas, trozos de chorizo dorado, pedacitos de pollo asado, queso rallado encima y varias salsas coloridas. Texturas brillantes y apetitosas.",
     precio: 19000,
-    imagen: "/assets/salchipapas/mixta.png",
+    imagen: "/assets/salchipapas/mixta.webp",
   },
   {
     id: 23,
@@ -44,7 +44,7 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas fritas, salchichas y salsa BBQ oscura y brillante.",
     descripcionLarga: "Salchipapas con papas fritas crocantes, salchichas doradas, bañadas en salsa BBQ oscura y brillante, cebolla caramelizada y queso rallado. Sabor ahumado y dulce irresistible.",
     precio: 17000,
-    imagen: "/assets/salchipapas/bbq.png",
+    imagen: "/assets/salchipapas/bbq.webp",
   },
   {
     id: 24,
@@ -53,7 +53,7 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas fritas, salchichas, jalapeños y salsa picante.",
     descripcionLarga: "Salchipapas con papas fritas doradas, salchichas en rodajas, cubiertas con jalapeños frescos, salsa picante roja brillante cayendo por los lados, queso cheddar rallado. Para los amantes del picante.",
     precio: 16500,
-    imagen: "/assets/salchipapas/picante.png",
+    imagen: "/assets/salchipapas/picante.webp",
   },
   {
     id: 25,
@@ -62,7 +62,7 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas fritas, salchichas, maíz, huevo de codorniz y queso.",
     descripcionLarga: "Salchipapas criollas con papas fritas crujientes, salchichas doradas, maíz tierno en granos, huevo de codorniz frito, queso rallado y salsa rosada. Colores vibrantes y texturas nítidas.",
     precio: 18000,
-    imagen: "/assets/salchipapas/criolla.png",
+    imagen: "/assets/salchipapas/criolla.webp",
   },
   {
     id: 26,
@@ -71,7 +71,7 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas fritas, salchichas, tocineta crocante y queso mozzarella.",
     descripcionLarga: "Salchipapas con papas fritas doradas, salchichas en rodajas, tiras de tocineta crocante encima, queso mozzarella fundido y salsa tártara cremosa. Combinación salada y crujiente.",
     precio: 18500,
-    imagen: "/assets/salchipapas/tocineta.png",
+    imagen: "/assets/salchipapas/tocineta.webp",
   },
   {
     id: 27,
@@ -80,6 +80,6 @@ export const salchipapas: Product[] = [
     descripcionCorta: "Papas rústicas, salchichas premium, rúcula y parmesano.",
     descripcionLarga: "Salchipapas gourmet con papas fritas gruesas estilo rústico, salchichas premium doradas, cebolla caramelizada en hilos, hojas frescas de rúcula, queso parmesano rallado y salsa de mostaza dijon brillante. Versión premium y sofisticada.",
     precio: 20000,
-    imagen: "/assets/salchipapas/gourmet.png",
+    imagen: "/assets/salchipapas/gourmet.webp",
   },
 ];

@@ -1,6 +1,5 @@
 import type { Product } from "../../types";
 
-
 export const perros: Product[] = [
     {
         id: 1,
@@ -10,7 +9,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Un perro caliente clásico sobre una tabla de madera rústica, en una mesa al aire libre con un fondo de bosque. Pan suave, salchicha roja, papas ripiadas encima y salsa rosada en zigzag.",
         precio: 12000,
-        imagen: "/assets/perros/perro-clasico.png",
+        imagen: "/assets/perros/perro-clasico.webp",
     },
     {
         id: 2,
@@ -20,7 +19,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Hot dog con pan dorado y salchicha jumbo, queso cheddar derretido y tocineta crocante encima, servido sobre una tabla de madera en una mesa con vista a un río entre árboles verdes.",
         precio: 15000,
-        imagen: "/assets/perros/perro-americano.png",
+        imagen: "/assets/perros/perro-americano.webp",
     },
     {
         id: 3,
@@ -30,7 +29,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Perro caliente con guacamole cremoso, jalapeños frescos y pico de gallo colorido, sobre una tabla de madera rústica, con fondo natural de bosque iluminado por el sol.",
         precio: 16000,
-        imagen: "/assets/perros/perro-mexicano.png",
+        imagen: "/assets/perros/perro-mexicano.webp",
     },
     {
         id: 4,
@@ -40,7 +39,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Hot dog con trozos de piña asada, queso mozzarella fundido y salsa dulce, servido en pan suave, sobre una tabla de madera con fondo de un río tranquilo rodeado de árboles.",
         precio: 17000,
-        imagen: "/assets/perros/perro-hawaiano.png",
+        imagen: "/assets/perros/perro-hawaiano.webp",
     },
     {
         id: 5,
@@ -50,7 +49,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Perro caliente con salsa BBQ brillante, cebolla caramelizada y queso cheddar, sobre pan dorado, colocado en una tabla de madera sobre una mesa en medio del bosque.",
         precio: 15000,
-        imagen: "/assets/perros/perro-bbq.png",
+        imagen: "/assets/perros/perro-bbq.webp",
     },
     {
         id: 6,
@@ -60,7 +59,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Hot dog con salsa de tomate casera, albahaca fresca y queso parmesano rallado, servido sobre una tabla de madera, con un fondo natural de bosque frondoso.",
         precio: 16000,
-        imagen: "/assets/perros/perro-italiano.png",
+        imagen: "/assets/perros/perro-italiano.webp",
     },
     {
         id: 7,
@@ -70,7 +69,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Perro caliente con fríjoles, aguacate en rodajas y queso rallado, servido en pan artesanal, sobre una tabla de madera con fondo de río y naturaleza verde.",
         precio: 17000,
-        imagen: "/assets/perros/perro-ranchero.png",
+        imagen: "/assets/perros/perro-ranchero.webp",
     },
     {
         id: 8,
@@ -80,7 +79,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Hot dog con jalapeños, salsa picante roja y queso derretido, pan ligeramente tostado, sobre tabla de madera, con fondo de un bosque al atardecer.",
         precio: 16000,
-        imagen: "/assets/perros/perro-picante.png",
+        imagen: "/assets/perros/perro-picante.webp",
     },
     {
         id: 9,
@@ -90,7 +89,7 @@ export const perros: Product[] = [
         descripcionLarga:
             "Perro caliente con huevo de codorniz frito encima, salsa rosada, papas ripiadas y queso rallado, sobre tabla de madera rústica, con un río y árboles verdes de fondo.",
         precio: 17000,
-        imagen: "/assets/perros/perro-criollo.png",
+        imagen: "/assets/perros/perro-criollo.webp",
     },
     {
         id: 10,
@@ -100,7 +99,6 @@ export const perros: Product[] = [
         descripcionLarga:
             "Hot dog con pan brioche artesanal, salchicha premium, cebolla caramelizada, rúcula y queso azul, sobre una tabla de madera, con fondo de bosque elegante y luz suave natural.",
         precio: 20000,
-        imagen: "/assets/perros/perro-gourmet.png",
+        imagen: "/assets/perros/perro-gourmet.webp",
     },
-
 ];
