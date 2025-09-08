@@ -2,7 +2,7 @@ import type { Product } from "../../types";
 
 export const salchipapas: Product[] = [
   {
-    id: 1,
+    id: 19,
     categoria: "Salchipapas",
     nombre: "Salchipapas Clásicas",
     descripcionCorta: "Papas fritas, salchichas y salsas rosada y mostaza.",
@@ -11,7 +11,7 @@ export const salchipapas: Product[] = [
     imagen: "/assets/salchipapas/clasica.png",
   },
   {
-    id: 2,
+    id: 20,
     categoria: "Salchipapas",
     nombre: "Salchipapas con Queso",
     descripcionCorta: "Papas fritas, salchichas y abundante queso cheddar fundido.",
@@ -20,7 +20,7 @@ export const salchipapas: Product[] = [
     imagen: "/assets/salchipapas/queso.png",
   },
   {
-    id: 3,
+    id: 21,
     categoria: "Salchipapas",
     nombre: "Salchipapas con Huevo",
     descripcionCorta: "Papas fritas, salchichas y huevo frito con yema brillante.",
@@ -29,7 +29,7 @@ export const salchipapas: Product[] = [
     imagen: "/assets/salchipapas/huevo.png",
   },
   {
-    id: 4,
+    id: 22,
     categoria: "Salchipapas",
     nombre: "Salchipapas Mixtas",
     descripcionCorta: "Papas fritas, salchichas, chorizo, pollo y queso rallado.",
@@ -38,7 +38,7 @@ export const salchipapas: Product[] = [
     imagen: "/assets/salchipapas/mixta.png",
   },
   {
-    id: 5,
+    id: 23,
     categoria: "Salchipapas",
     nombre: "Salchipapas BBQ",
     descripcionCorta: "Papas fritas, salchichas y salsa BBQ oscura y brillante.",
@@ -47,7 +47,7 @@ export const salchipapas: Product[] = [
     imagen: "/assets/salchipapas/bbq.png",
   },
   {
-    id: 6,
+    id: 24,
     categoria: "Salchipapas",
     nombre: "Salchipapas Picantes",
     descripcionCorta: "Papas fritas, salchichas, jalapeños y salsa picante.",
@@ -56,7 +56,7 @@ export const salchipapas: Product[] = [
     imagen: "/assets/salchipapas/picante.png",
   },
   {
-    id: 7,
+    id: 25,
     categoria: "Salchipapas",
     nombre: "Salchipapas Criollas",
     descripcionCorta: "Papas fritas, salchichas, maíz, huevo de codorniz y queso.",
@@ -65,7 +65,7 @@ export const salchipapas: Product[] = [
     imagen: "/assets/salchipapas/criolla.png",
   },
   {
-    id: 8,
+    id: 26,
     categoria: "Salchipapas",
     nombre: "Salchipapas con Tocineta",
     descripcionCorta: "Papas fritas, salchichas, tocineta crocante y queso mozzarella.",
@@ -74,7 +74,7 @@ export const salchipapas: Product[] = [
     imagen: "/assets/salchipapas/tocineta.png",
   },
   {
-    id: 9,
+    id: 27,
     categoria: "Salchipapas",
     nombre: "Salchipapas Gourmet",
     descripcionCorta: "Papas rústicas, salchichas premium, rúcula y parmesano.",

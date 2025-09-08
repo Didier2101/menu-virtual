@@ -2,7 +2,7 @@ import type { Product } from "../../types";
 
 export const bebidas: Product[] = [
     {
-        id: 1,
+        id: 28,
         categoria: "Bebidas",
         nombre: "Limonada Natural",
         descripcionCorta: "Refrescante limonada natural con rodajas de limón y hielo.",
@@ -11,7 +11,7 @@ export const bebidas: Product[] = [
         imagen: "/assets/bebidas/limonada.png",
     },
     {
-        id: 2,
+        id: 29,
         categoria: "Bebidas",
         nombre: "Café Latte",
         descripcionCorta: "Café latte con arte en espuma y textura aterciopelada.",
@@ -20,7 +20,7 @@ export const bebidas: Product[] = [
         imagen: "/assets/bebidas/latte.png",
     },
     {
-        id: 3,
+        id: 30,
         categoria: "Bebidas",
         nombre: "Smoothie de Fresa y Banana",
         descripcionCorta: "Smoothie cremoso de fresa y banana con rodajas de fresa.",
@@ -29,7 +29,7 @@ export const bebidas: Product[] = [
         imagen: "/assets/bebidas/smoothie.png",
     },
     {
-        id: 4,
+        id: 31,
         categoria: "Bebidas",
         nombre: "Chocolate Caliente",
         descripcionCorta: "Chocolate caliente con malvaviscos y polvo de cacao.",
@@ -38,7 +38,7 @@ export const bebidas: Product[] = [
         imagen: "/assets/bebidas/chocolate.png",
     },
     {
-        id: 5,
+        id: 32,
         categoria: "Bebidas",
         nombre: "Cóctel Tropical",
         descripcionCorta: "Cóctel tropical colorido con piña, cereza y sombrillita.",

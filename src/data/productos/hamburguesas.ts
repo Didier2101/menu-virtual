@@ -2,7 +2,7 @@ import type { Product } from "../../types";
 
 export const hamburguesas: Product[] = [
     {
-        id: 1,
+        id: 11,
         categoria: "Hamburguesas",
         nombre: "Hamburguesa BBQ",
         descripcionCorta: "Salsa BBQ, cebolla caramelizada y queso cheddar.",
@@ -12,7 +12,7 @@ export const hamburguesas: Product[] = [
         imagen: "/assets/hamburguesas/hamburguesa-bbq.png",
     },
     {
-        id: 2,
+        id: 12,
         categoria: "Hamburguesas",
         nombre: "Hamburguesa Pollo Crispy",
         descripcionCorta: "Pollo apanado crujiente, queso mozzarella y salsa blanca.",
@@ -22,7 +22,7 @@ export const hamburguesas: Product[] = [
         imagen: "/assets/hamburguesas/hamburguesa-pollo.png",
     },
     {
-        id: 3,
+        id: 13,
         categoria: "Hamburguesas",
         nombre: "Hamburguesa Vegetariana",
         descripcionCorta: "Medallón de garbanzo, queso suizo y aguacate.",
@@ -32,7 +32,7 @@ export const hamburguesas: Product[] = [
         imagen: "/assets/hamburguesas/hamburguesa-vegetariana.png",
     },
     {
-        id: 4,
+        id: 14,
         categoria: "Hamburguesas",
         nombre: "Hamburguesa Hawaiana",
         descripcionCorta: "Piña asada, jamón ahumado y queso mozzarella.",
@@ -42,7 +42,7 @@ export const hamburguesas: Product[] = [
         imagen: "/assets/hamburguesas/hamburguesa-hawaiana.png",
     },
     {
-        id: 5,
+        id: 15,
         categoria: "Hamburguesas",
         nombre: "Hamburguesa Mexicana",
         descripcionCorta: "Guacamole, jalapeños, pico de gallo y queso cheddar.",
@@ -52,7 +52,7 @@ export const hamburguesas: Product[] = [
         imagen: "/assets/hamburguesas/hamburguesa-mexicana.png",
     },
     {
-        id: 6,
+        id: 16,
         categoria: "Hamburguesas",
         nombre: "Hamburguesa Criolla",
         descripcionCorta: "Huevo frito, papas ripiadas, queso y salsa rosada.",
@@ -62,7 +62,7 @@ export const hamburguesas: Product[] = [
         imagen: "/assets/hamburguesas/hamburguesa-criolla.png",
     },
     {
-        id: 7,
+        id: 17,
         categoria: "Hamburguesas",
         nombre: "Hamburguesa Picante",
         descripcionCorta: "Jalapeños, salsa picante y queso pepper jack.",
@@ -72,7 +72,7 @@ export const hamburguesas: Product[] = [
         imagen: "/assets/hamburguesas/hamburguesa-picante.png",
     },
     {
-        id: 8,
+        id: 18,
         categoria: "Hamburguesas",
         nombre: "Hamburguesa Gourmet",
         descripcionCorta: "Carne premium, cebolla caramelizada, rúcula y queso azul.",

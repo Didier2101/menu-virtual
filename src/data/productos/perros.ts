@@ -102,24 +102,5 @@ export const perros: Product[] = [
         precio: 20000,
         imagen: "/assets/perros/perro-gourmet.png",
     },
-    {
-        id: 11,
-        categoria: "Hamburguesas",
-        nombre: "Hamburguesa Sencilla",
-        descripcionCorta: "Carne jugosa, queso amarillo, lechuga y tomate.",
-        descripcionLarga:
-            "Fotografía ultra realista en primer plano de una hamburguesa sencilla servida sobre una tabla de madera rústica. Pan brioche dorado con semillas de ajonjolí, carne jugosa de res asada con marcas de parrilla, una loncha de queso amarillo fundido, lechuga fresca y tomate en rodajas. Texturas brillantes en la carne y pan.",
-        precio: 18000,
-        imagen: "/assets/hamburguesas/hamburguesa-sencilla.png",
-    },
-    {
-        id: 12,
-        categoria: "Hamburguesas",
-        nombre: "Hamburguesa Doble Carne",
-        descripcionCorta: "Doble carne, queso cheddar y vegetales frescos.",
-        descripcionLarga:
-            "Fotografía ultra realista en primer plano de una hamburguesa doble carne servida en tabla de madera. Pan brioche dorado, dos capas de carne gruesa jugosa con queso cheddar derretido entre cada capa, vegetales frescos (lechuga, tomate) y salsa de la casa. Texturas nítidas, queso cayendo por los lados.",
-        precio: 22000,
-        imagen: "/assets/hamburguesas/hamburguesa-doble.png",
-    },
+
 ];
