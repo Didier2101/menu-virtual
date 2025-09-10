@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { products as productsData } from "./data/productos";
+import { products as productsData, categories } from "./data/productos";
 import Tabs from "./components/Tabs";
 import ProductGrid from "./components/ProductGrid";
 import ProductModal from "./components/ProductModal";
 import Header from "./components/Header";
 import CartButton from "./components/CartButton";
 import CartModal from "./components/CartModal";
-import SearchBar from "./components/SearchBar"; // Nuevo componente
+import SearchBar from "./components/SearchBar";
 
 import type { Product } from "./types";
 
@@ -15,30 +15,34 @@ export interface CartItem {
   quantity: number;
 }
 
-const categories = [
-  "Todos",
-  "Perros Calientes",
-  "Hamburguesas",
-  "Salchipapas",
-  "Bebidas",
-];
+// Clave para localStorage
+const CART_STORAGE_KEY = "jullymar_cart";
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [searchTerm, setSearchTerm] = useState(""); // Nuevo estado para búsqueda
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // ✅ carrito persistente con localStorage
+  // ✅ carrito en localStorage
   const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem("cart");
-    return saved ? JSON.parse(saved) : [];
+    // Recuperar carrito del localStorage al inicializar
+    try {
+      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error("Error loading cart from localStorage:", error);
+      return [];
+    }
   });
-
   const [cartOpen, setCartOpen] = useState(false);
 
-  // ✅ Guardar en localStorage cada vez que cambie el carrito
+  // ✅ Guardar carrito en localStorage cuando cambie
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch (error) {
+      console.error("Error saving cart to localStorage:", error);
+    }
   }, [cart]);
 
   // ✅ Filtrar productos por categoría Y búsqueda
@@ -57,14 +61,19 @@ export default function App() {
   const addToCart = (product: Product) => {
     setCart((prev) => {
       const exists = prev.find((item) => item.product.id === product.id);
+      let newCart;
+
       if (exists) {
-        return prev.map((item) =>
+        newCart = prev.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
+      } else {
+        newCart = [...prev, { product, quantity: 1 }];
       }
-      return [...prev, { product, quantity: 1 }];
+
+      return newCart;
     });
   };
 
@@ -97,9 +106,12 @@ export default function App() {
   }, [selectedCategory]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none', msUserSelect: 'none' }}>
+      {/* Metatag para prevenir zoom en móviles */}
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
       {/* Header */}
-      <Header title="Rápido & Rico" subtitle="Menú - Escanea el QR" />
+      <Header title="Jully Mar" subtitle="Menú Virtual • Sistema de Pedidos" />
 
       {/* Main */}
       <main className="max-w-xl mx-auto pt-20">
@@ -140,6 +152,14 @@ export default function App() {
         onClear={clearCart}
         onUpdateQuantity={updateQuantity}
       />
+
+      {/* Pie de página */}
+      <footer className="py-4 text-center text-xs text-gray-500 mt-0">
+        <p className="flex items-center justify-center gap-1">
+          <span>©</span>
+          {new Date().getFullYear()} Derechos reservados Didier Chavez - Desarrollador Tel: 3028645014
+        </p>
+      </footer>
     </div>
   );
 }

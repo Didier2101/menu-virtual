@@ -1,0 +1,58 @@
+import type { Product } from "../../types";
+
+export const otros: Product[] = [
+    {
+        id: "ot1",
+        categoria: "Otros",
+        nombre: "Sándwich Club House",
+        descripcionCorta: "Sándwich club house completo.",
+        descripcionLarga: "Pan sándwich con BBQ, Mayonesa, Mostaza, Salsa de Tomate, Showy, Maíz, Salsa de Ajo, lechuga, tomate, cebolla, pollo, papa francesa, jamón y queso.",
+        precio: 22000,
+        imagen: "/assets/otros/club-house.webp",
+    },
+    {
+        id: "ot2",
+        categoria: "Otros",
+        nombre: "Shawarma Carne Mixta",
+        descripcionCorta: "Shawarma de carne mixta.",
+        descripcionLarga: "Shawarma con BBQ, Mayonesa, Mostaza, Salsa de Tomate, Showy, Maíz, Salsa de Ajo, lechuga, tomate, cebolla en ruedas, carne mixta (carne, pollo, cerdo), maíz, queso tajado y jamón.",
+        precio: 16000,
+        imagen: "/assets/otros/shawarma-carne.webp",
+    },
+    {
+        id: "ot3",
+        categoria: "Otros",
+        nombre: "Plato Especial",
+        descripcionCorta: "Plato con chuleta, pollo, ensalada y papa francesa.",
+        descripcionLarga: "Plato completo con chuleta, pollo, ensalada de lechuga, tomate, cebolla, aguacate y aderezo de salsa showi más papa francesa.",
+        precio: 21000,
+        imagen: "/assets/otros/plato-especial.webp",
+    },
+    {
+        id: "ot4",
+        categoria: "Otros",
+        nombre: "Menú Infantil",
+        descripcionCorta: "Menú para niños incluye jugo de caja.",
+        descripcionLarga: "Menú especial para niños con porciones adecuadas e incluye jugo de caja.",
+        precio: 16000,
+        imagen: "/assets/otros/menu-infantil.webp",
+    },
+    {
+        id: "ot5",
+        categoria: "Otros",
+        nombre: "Patacón Tradicional",
+        descripcionCorta: "Patacón tradicional.",
+        descripcionLarga: "Delicioso patacón crujiente con acompañamientos tradicionales.",
+        precio: 16000,
+        imagen: "/assets/otros/patacon.webp",
+    },
+    {
+        id: "ot6",
+        categoria: "Otros",
+        nombre: "Shawaburguer Especial",
+        descripcionCorta: "Shawaburguer especial.",
+        descripcionLarga: "Lechuga, tomate, cebolla, queso, jamón, huevo, carne, tocineta, papas francesa, salsas y tortilla.",
+        precio: 21000,
+        imagen: "/assets/otros/Shawaburguer-especial.webp",
+    },
+];

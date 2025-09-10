@@ -12,6 +12,11 @@ const categoryIcons: Record<string, string> = {
     "Hamburguesas": "🍔",
     "Salchipapas": "🍟",
     "Bebidas": "🥤",
+    "Arepas": "🫓",
+    "Sándwich": "🥪",
+    "Otros": "➕",
+    "Servicios (Mini)": "🥣",
+    "Matador": "🔥"
 };
 
 export default function Tabs({ categories, onSelect }: Props) {
@@ -53,7 +58,7 @@ export default function Tabs({ categories, onSelect }: Props) {
                                 }`}
                             aria-pressed={active === cat}
                         >
-                            {categoryIcons[cat]}
+                            {categoryIcons[cat] || "❓"}
                         </button>
                         <span className="text-gray-600 text-xs mt-1 font-medium max-w-[80px] truncate">
                             {cat}

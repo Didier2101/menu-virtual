@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Trash2, Plus, Minus, MapPin, Utensils } from "lucide-react";
+import { X, Trash2, Plus, Minus, MapPin, Utensils, ShoppingBag } from "lucide-react";
 import Swal from "sweetalert2";
 import type { CartItem } from "../App";
 import { mesasDisponibles, type Mesa } from "../data/mesas";
@@ -14,7 +14,7 @@ interface Props {
     onUpdateQuantity: (id: string, newQty: number) => void;
 }
 
-type ServiceType = "mesa" | "domicilio";
+type ServiceType = "mesa" | "domicilio" | "paraLlevar"; // Nuevo tipo agregado
 
 export default function CartModal({
     open,
@@ -45,7 +45,8 @@ export default function CartModal({
     const validateForm = () => {
         const newErrors = {
             name: !name.trim(),
-            location: serviceType === "domicilio" ? !address.trim() : !selectedMesa
+            location: serviceType === "domicilio" ? !address.trim() :
+                serviceType === "mesa" ? !selectedMesa : false
         };
         setErrors(newErrors);
         return !newErrors.name && !newErrors.location;
@@ -59,7 +60,9 @@ export default function CartModal({
                 title: "Campos requeridos",
                 text: serviceType === "domicilio"
                     ? "Por favor completa tu nombre y dirección para continuar"
-                    : "Por favor completa tu nombre y selecciona una mesa para continuar",
+                    : serviceType === "mesa"
+                        ? "Por favor completa tu nombre y selecciona una mesa para continuar"
+                        : "Por favor completa tu nombre para continuar", // Mensaje para llevar
                 icon: "warning",
                 confirmButtonColor: "#16a34a",
             });
@@ -68,10 +71,12 @@ export default function CartModal({
 
         const locationInfo = serviceType === "domicilio"
             ? `📍 Dirección: ${address}\n`
-            : `🍽️ Mesa: ${selectedMesa?.nombre}\n`;
+            : serviceType === "mesa"
+                ? `🍽️ Mesa: ${selectedMesa?.nombre}\n`
+                : `📦 Tipo: Para llevar\n`; // Info para llevar
 
         const message = encodeURIComponent(
-            `🛒 Nuevo pedido (${serviceType === "domicilio" ? "A domicilio" : "En el local"}):\n\n` +
+            `🛒 Nuevo pedido (${serviceType === "domicilio" ? "A domicilio" : serviceType === "mesa" ? "En el local" : "Para llevar"}):\n\n` +
             `${items.map((i) => `• ${i.product.nombre} x${i.quantity}`).join("\n")}\n\n` +
             `Subtotal: $${subtotal.toLocaleString()}\n` +
             (serviceType === "domicilio" ? `🚚 Domicilio: $${deliveryFee.toLocaleString()}\n` : "") +
@@ -83,7 +88,7 @@ export default function CartModal({
             `💳 Pago: ${payment}`
         );
 
-        window.open(`https://wa.me/573028645014?text=${message}`, '_blank');
+        window.open(`https://wa.me/573213501142?text=${message}`, '_blank');
     };
 
     const confirmRemove = (id: string) => {
@@ -244,31 +249,41 @@ export default function CartModal({
                                 </div>
                             </div>
 
-                            {/* Tipo de servicio */}
+                            {/* Tipo de servicio - Ahora con 3 opciones */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     📍 Tipo de servicio
                                 </label>
-                                <div className="flex gap-2 mb-4">
+                                <div className="grid grid-cols-3 gap-2 mb-4">
                                     <button
                                         onClick={() => handleServiceTypeChange("mesa")}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "mesa"
-                                                ? "bg-green-600 text-white"
-                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "mesa"
+                                            ? "bg-green-600 text-white"
+                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                             }`}
                                     >
                                         <Utensils size={16} />
-                                        En el local
+                                        En local
                                     </button>
                                     <button
                                         onClick={() => handleServiceTypeChange("domicilio")}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "domicilio"
-                                                ? "bg-green-600 text-white"
-                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "domicilio"
+                                            ? "bg-green-600 text-white"
+                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                             }`}
                                     >
                                         <MapPin size={16} />
-                                        A domicilio
+                                        Domicilio
+                                    </button>
+                                    <button
+                                        onClick={() => handleServiceTypeChange("paraLlevar")}
+                                        className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "paraLlevar"
+                                            ? "bg-green-600 text-white"
+                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                            }`}
+                                    >
+                                        <ShoppingBag size={16} />
+                                        Para llevar
                                     </button>
                                 </div>
                             </div>
@@ -303,7 +318,7 @@ export default function CartModal({
                                         </p>
                                     )}
                                 </div>
-                            ) : (
+                            ) : serviceType === "domicilio" ? (
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         📍 Dirección de entrega
@@ -320,21 +335,30 @@ export default function CartModal({
                                     />
                                     {errors.location && <p className="text-red-500 text-xs mt-1">La dirección es requerida</p>}
                                 </div>
-                            )}
+                            ) : null}
 
-                            {/* Propina */}
+                            {/* Propina con botón "Sin propina" */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    🙏 Agregar propina
+                                    🙏 Agregar propina (opcional)
                                 </label>
                                 <div className="flex gap-2 mb-2">
+                                    <button
+                                        onClick={() => setTip(0)}
+                                        className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${tip === 0
+                                            ? "bg-green-600 text-white border-green-600"
+                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                            }`}
+                                    >
+                                        Sin propina
+                                    </button>
                                     {[1000, 2000, 5000].map((val) => (
                                         <button
                                             key={val}
                                             onClick={() => setTip(val)}
                                             className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${tip === val
-                                                    ? "bg-green-600 text-white border-green-600"
-                                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                ? "bg-green-600 text-white border-green-600"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                                 }`}
                                         >
                                             +${val.toLocaleString()}
@@ -396,7 +420,11 @@ export default function CartModal({
                                     onClick={handleWhatsAppClick}
                                     className="block bg-green-600 hover:bg-green-700 transition text-white text-center py-3 rounded-xl font-semibold shadow-lg"
                                 >
-                                    {serviceType === "domicilio" ? "Pedir a domicilio" : "Pedir en local"}
+                                    {serviceType === "domicilio"
+                                        ? "Pedir a domicilio"
+                                        : serviceType === "mesa"
+                                            ? "Pedir en local"
+                                            : "Pedir para llevar"}
                                 </a>
                                 <button
                                     onClick={confirmClear}

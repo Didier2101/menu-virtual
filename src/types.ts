@@ -1,5 +1,5 @@
 export interface Product {
-    id: number;
+    id: string | number;
     categoria: string; // 'Perros Calientes' | 'Hamburguesas' | 'Salchipapas' | 'Bebidas'
     nombre: string;
     descripcionCorta: string;

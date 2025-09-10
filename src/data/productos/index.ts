@@ -1,17 +1,24 @@
-import { bebidas } from "./bebidas";
-import { hamburguesas } from "./hamburguesas";
 import { perros } from "./perros";
-import { pizzas } from "./pizzas";
+import { hamburguesas } from "./hamburguesas";
 import { salchipapas } from "./salchipapas";
-
+import { arepas } from "./arepas";
+import { sandwich } from "./sandwich";
+import { otros } from "./otros";
+import { servicios_mini } from "./servicios_mini";
+import { bebidas } from "./bebidas";
+import { matador } from "./matador";
 
 // Combinar todos los productos
 export const products = [
     ...perros,
     ...hamburguesas,
     ...salchipapas,
-    ...pizzas,
-    ...bebidas
+    ...arepas,
+    ...sandwich,
+    ...otros,
+    ...servicios_mini,
+    ...bebidas,
+    ...matador
 ];
 
 // Exportar categorías
@@ -20,8 +27,12 @@ export const categories = [
     "Perros Calientes",
     "Hamburguesas",
     "Salchipapas",
-    "Pizzas",
-    "Bebidas"
+    "Arepas",
+    "Sándwich",
+    "Bebidas",
+    "Servicios (Mini)",
+    "Matador",
+    "Otros",
 ];
 
 // Exportar íconos de categorías
@@ -30,6 +41,10 @@ export const categoryIcons: Record<string, string> = {
     "Perros Calientes": "🌭",
     "Hamburguesas": "🍔",
     "Salchipapas": "🍟",
-    "Pizzas": "🍕",
-    "Bebidas": "🥤"
+    "Arepas": "🫓",
+    "Sándwich": "🥪",
+    "Otros": "➕",
+    "Servicios (Mini)": "🥣",
+    "Bebidas": "🥤",
+    "Matador": "🔥"
 };
