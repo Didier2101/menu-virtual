@@ -88,7 +88,7 @@ export default function CartModal({
             `💳 Pago: ${payment}`
         );
 
-        window.open(`https://wa.me/573213501142?text=${message}`, '_blank');
+        window.open(`https://wa.me/573028645014?text=${message}`, '_blank');
     };
 
     const confirmRemove = (id: string) => {
