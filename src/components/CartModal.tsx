@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Trash2, Plus, Minus, MapPin, Utensils, ShoppingBag } from "lucide-react";
+import { X, Trash2, Plus, Minus, MapPin, Utensils, ShoppingBag, Navigation, Map } from "lucide-react";
 import Swal from "sweetalert2";
 import type { CartItem } from "../App";
 import { mesasDisponibles, type Mesa } from "../data/mesas";
@@ -37,6 +37,8 @@ export default function CartModal({
         location: false,
         cash: false
     });
+    // const [showMap, setShowMap] = useState(false);
+    const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
 
     if (!open) return null;
 
@@ -45,17 +47,8 @@ export default function CartModal({
         0
     );
 
-    const getDeliveryFee = () => {
-        if (serviceType !== "domicilio") return 0;
-
-        const isFar = address.toLowerCase().includes("lejos") ||
-            address.toLowerCase().includes("lejano") ||
-            address.length > 40;
-
-        return isFar ? 5000 : 3000;
-    };
-
-    const deliveryFee = getDeliveryFee();
+    // Precio fijo de domicilio
+    const deliveryFee = serviceType === "domicilio" ? 3000 : 0;
     const total = subtotal + deliveryFee + tip;
 
     const calculateChange = () => {
@@ -99,13 +92,15 @@ export default function CartModal({
         }
 
         const locationInfo = serviceType === "domicilio"
-            ? `📍 Dirección: ${address}\n`
+            ? `📍 Dirección: ${address}\n` +
+            (selectedLocation ? `🗺️ Ubicación: https://www.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}\n` : "")
             : serviceType === "mesa"
                 ? `🍽️ Mesa: ${selectedMesa?.nombre}\n`
                 : `📦 Tipo: Para llevar\n`;
 
         const deliveryInfo = serviceType === "domicilio"
-            ? `🚚 Domicilio: $${deliveryFee.toLocaleString()} (${deliveryFee === 3000 ? "Zona cercana" : "Zona lejana"})\n`
+            ? `🚚 Domicilio: $${deliveryFee.toLocaleString()}\n` +
+            `ℹ️ Si la ubicación es muy lejana, el precio podría aumentar a $5000\n`
             : "";
 
         const paymentInfo = payment === "Efectivo"
@@ -147,7 +142,6 @@ export default function CartModal({
         });
     };
 
-    // FUNCIÓN confirmClear AÑADIDA AQUÍ
     const confirmClear = () => {
         Swal.fire({
             title: "¿Vaciar carrito?",
@@ -169,6 +163,7 @@ export default function CartModal({
     const handleServiceTypeChange = (type: ServiceType) => {
         setServiceType(type);
         setErrors({ ...errors, location: false });
+        setSelectedLocation(null);
     };
 
     const formatCashInput = (value: string) => {
@@ -177,6 +172,52 @@ export default function CartModal({
         const number = parseInt(numericValue.replace(/\D/g, ''));
         if (isNaN(number)) return '';
         return number.toLocaleString();
+    };
+
+    // Función para obtener la ubicación actual del usuario
+    const getCurrentLocation = () => {
+        if (!navigator.geolocation) {
+            Swal.fire({
+                title: "Geolocalización no soportada",
+                text: "Tu navegador no soporta la geolocalización",
+                icon: "error",
+                confirmButtonColor: "#16a34a",
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: "Obteniendo ubicación",
+            text: "Por favor permite el acceso a tu ubicación",
+            icon: "info",
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setSelectedLocation({ lat: latitude, lng: longitude });
+                Swal.fire({
+                    title: "Ubicación obtenida",
+                    text: "Tu ubicación se ha guardado correctamente",
+                    icon: "success",
+                    confirmButtonColor: "#16a34a",
+                });
+            },
+            (error) => {
+                console.error("Error obteniendo ubicación:", error);
+                Swal.fire({
+                    title: "Error",
+                    text: "No se pudo obtener tu ubicación. Asegúrate de haber permitido el acceso.",
+                    icon: "error",
+                    confirmButtonColor: "#16a34a",
+                });
+            }
+        );
     };
 
     return (
@@ -266,7 +307,7 @@ export default function CartModal({
                                 </div>
                                 {serviceType === "domicilio" && (
                                     <div className="flex justify-between text-red-500">
-                                        <span>+ Domicilio ({deliveryFee === 3000 ? "Cerca" : "Lejos"})</span>
+                                        <span>+ Domicilio</span>
                                         <span>${deliveryFee.toLocaleString()}</span>
                                     </div>
                                 )}
@@ -360,25 +401,48 @@ export default function CartModal({
                             ) : serviceType === "domicilio" ? (
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        📍 Dirección de entrega
+                                        📍 Dirección de entrega *
                                     </label>
                                     <input
                                         type="text"
-                                        placeholder="Tu dirección *"
+                                        placeholder="Ingresa tu dirección completa"
                                         value={address}
                                         onChange={(e) => {
                                             setAddress(e.target.value);
                                             if (errors.location) setErrors({ ...errors, location: false });
                                         }}
-                                        className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
+                                        className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none mb-2`}
                                     />
-                                    {errors.location && <p className="text-red-500 text-xs mt-1">La dirección es requerida</p>}
-                                    {address && (
-                                        <p className="text-sm text-gray-600 mt-1">
-                                            Costo de envío: ${deliveryFee.toLocaleString()}
-                                            ({deliveryFee === 3000 ? "Zona cercana" : "Zona lejana"})
+
+                                    <div className="mb-2">
+                                        <button
+                                            onClick={getCurrentLocation}
+                                            className="w-full flex items-center justify-center gap-2 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition"
+                                        >
+                                            <Navigation size={16} />
+                                            Obtener mi ubicación automáticamente
+                                        </button>
+                                        <p className="text-xs text-gray-500 mt-1 text-center">
+                                            Opcional: Comparte tu ubicación para facilitar la entrega
                                         </p>
+                                    </div>
+
+                                    {selectedLocation && (
+                                        <div className="bg-green-50 p-3 rounded-lg mb-2">
+                                            <p className="text-green-700 text-sm flex items-center gap-2">
+                                                <Map size={16} />
+                                                <span>Ubicación guardada: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}</span>
+                                            </p>
+                                            <p className="text-xs text-green-600 mt-1">
+                                                El domiciliario recibirá un enlace para abrir en Maps/Waze
+                                            </p>
+                                        </div>
                                     )}
+
+                                    {errors.location && <p className="text-red-500 text-xs mt-1">La dirección es requerida</p>}
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        Costo de envío: ${deliveryFee.toLocaleString()} (Si la ubicación es muy lejana, el precio podría aumentar a $5000)
+                                    </p>
                                 </div>
                             ) : null}
 
