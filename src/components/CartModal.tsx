@@ -14,7 +14,7 @@ interface Props {
     onUpdateQuantity: (id: string, newQty: number) => void;
 }
 
-type ServiceType = "mesa" | "domicilio" | "paraLlevar"; // Nuevo tipo agregado
+type ServiceType = "mesa" | "domicilio" | "paraLlevar";
 
 export default function CartModal({
     open,
@@ -29,9 +29,14 @@ export default function CartModal({
     const [selectedMesa, setSelectedMesa] = useState<Mesa | null>(null);
     const [instructions, setInstructions] = useState("");
     const [payment, setPayment] = useState("Efectivo");
+    const [cashAmount, setCashAmount] = useState("");
     const [tip, setTip] = useState(0);
     const [serviceType, setServiceType] = useState<ServiceType>("mesa");
-    const [errors, setErrors] = useState({ name: false, location: false });
+    const [errors, setErrors] = useState({
+        name: false,
+        location: false,
+        cash: false
+    });
 
     if (!open) return null;
 
@@ -39,30 +44,54 @@ export default function CartModal({
         (sum, item) => sum + item.product.precio * item.quantity,
         0
     );
-    const deliveryFee = serviceType === "domicilio" ? 2000 : 0;
+
+    const getDeliveryFee = () => {
+        if (serviceType !== "domicilio") return 0;
+
+        const isFar = address.toLowerCase().includes("lejos") ||
+            address.toLowerCase().includes("lejano") ||
+            address.length > 40;
+
+        return isFar ? 5000 : 3000;
+    };
+
+    const deliveryFee = getDeliveryFee();
     const total = subtotal + deliveryFee + tip;
+
+    const calculateChange = () => {
+        if (payment !== "Efectivo" || !cashAmount) return 0;
+        const cash = parseInt(cashAmount.replace(/\D/g, '')) || 0;
+        return cash - total;
+    };
+
+    const change = calculateChange();
 
     const validateForm = () => {
         const newErrors = {
             name: !name.trim(),
             location: serviceType === "domicilio" ? !address.trim() :
-                serviceType === "mesa" ? !selectedMesa : false
+                serviceType === "mesa" ? !selectedMesa : false,
+            cash: payment === "Efectivo" && (!cashAmount || change < 0)
         };
         setErrors(newErrors);
-        return !newErrors.name && !newErrors.location;
+        return !newErrors.name && !newErrors.location && !newErrors.cash;
     };
 
     const handleWhatsAppClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
 
         if (!validateForm()) {
+            let errorMessage = "Por favor completa los siguientes campos:";
+            if (!name.trim()) errorMessage += "\n• Tu nombre";
+            if (serviceType === "domicilio" && !address.trim()) errorMessage += "\n• Dirección de entrega";
+            if (serviceType === "mesa" && !selectedMesa) errorMessage += "\n• Selecciona una mesa";
+            if (payment === "Efectivo" && (!cashAmount || change < 0)) {
+                errorMessage += "\n• Monto en efectivo suficiente para cubrir el total";
+            }
+
             Swal.fire({
                 title: "Campos requeridos",
-                text: serviceType === "domicilio"
-                    ? "Por favor completa tu nombre y dirección para continuar"
-                    : serviceType === "mesa"
-                        ? "Por favor completa tu nombre y selecciona una mesa para continuar"
-                        : "Por favor completa tu nombre para continuar", // Mensaje para llevar
+                text: errorMessage,
                 icon: "warning",
                 confirmButtonColor: "#16a34a",
             });
@@ -73,19 +102,28 @@ export default function CartModal({
             ? `📍 Dirección: ${address}\n`
             : serviceType === "mesa"
                 ? `🍽️ Mesa: ${selectedMesa?.nombre}\n`
-                : `📦 Tipo: Para llevar\n`; // Info para llevar
+                : `📦 Tipo: Para llevar\n`;
+
+        const deliveryInfo = serviceType === "domicilio"
+            ? `🚚 Domicilio: $${deliveryFee.toLocaleString()} (${deliveryFee === 3000 ? "Zona cercana" : "Zona lejana"})\n`
+            : "";
+
+        const paymentInfo = payment === "Efectivo"
+            ? `💵 Paga con: $${parseInt(cashAmount.replace(/\D/g, '')).toLocaleString()}\n` +
+            `🪙 Cambio: $${change.toLocaleString()}\n`
+            : `💳 Pago: ${payment}\n`;
 
         const message = encodeURIComponent(
             `🛒 Nuevo pedido (${serviceType === "domicilio" ? "A domicilio" : serviceType === "mesa" ? "En el local" : "Para llevar"}):\n\n` +
             `${items.map((i) => `• ${i.product.nombre} x${i.quantity}`).join("\n")}\n\n` +
             `Subtotal: $${subtotal.toLocaleString()}\n` +
-            (serviceType === "domicilio" ? `🚚 Domicilio: $${deliveryFee.toLocaleString()}\n` : "") +
+            deliveryInfo +
             (tip > 0 ? `🙏 Propina: $${tip.toLocaleString()}\n` : "") +
             `TOTAL: $${total.toLocaleString()}\n\n` +
             `👤 Nombre: ${name}\n` +
             locationInfo +
-            `📝 Instrucciones: ${instructions || "Ninguna"}\n` +
-            `💳 Pago: ${payment}`
+            `📝 Instrucciones especiales: ${instructions || "Ninguna"}\n` +
+            paymentInfo
         );
 
         window.open(`https://wa.me/573028645014?text=${message}`, '_blank');
@@ -109,6 +147,7 @@ export default function CartModal({
         });
     };
 
+    // FUNCIÓN confirmClear AÑADIDA AQUÍ
     const confirmClear = () => {
         Swal.fire({
             title: "¿Vaciar carrito?",
@@ -129,12 +168,19 @@ export default function CartModal({
 
     const handleServiceTypeChange = (type: ServiceType) => {
         setServiceType(type);
-        setErrors({ name: false, location: false });
+        setErrors({ ...errors, location: false });
+    };
+
+    const formatCashInput = (value: string) => {
+        const numericValue = value.replace(/[^\d,.]/g, '');
+        if (!numericValue) return '';
+        const number = parseInt(numericValue.replace(/\D/g, ''));
+        if (isNaN(number)) return '';
+        return number.toLocaleString();
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-            {/* Fondo oscuro */}
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
             <motion.div
@@ -147,23 +193,18 @@ export default function CartModal({
                 animate={{ y: 0, opacity: 1 }}
                 className="relative w-full md:max-w-md bg-white rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col"
                 style={{
-                    height: 'min(90vh, 700px)', // Altura máxima fija
-                    minHeight: '60vh' // Altura mínima
+                    height: 'min(90vh, 700px)',
+                    minHeight: '60vh'
                 }}
             >
-                {/* Header fijo */}
                 <div className="flex-shrink-0 p-4 border-b border-gray-100">
-                    {/* Barra para arrastrar en móviles */}
                     <div className="md:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
-
-                    {/* Botón cerrar para desktop */}
                     <button
                         onClick={onClose}
                         className="hidden md:block absolute right-5 top-5 text-gray-500 hover:text-gray-700"
                     >
                         <X size={24} />
                     </button>
-
                     <h2 className="text-2xl font-bold text-gray-900">🛍️ Tu pedido</h2>
                 </div>
 
@@ -173,9 +214,7 @@ export default function CartModal({
                     </div>
                 ) : (
                     <>
-                        {/* Contenido scrolleable */}
                         <div className="flex-1 overflow-y-auto px-4 py-2">
-                            {/* Lista productos */}
                             <ul className="rounded-xl bg-gray-50 mb-4">
                                 {items.map((item) => (
                                     <li
@@ -187,7 +226,6 @@ export default function CartModal({
                                             <span className="ml-1 text-sm text-gray-500">x{item.quantity}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            {/* Botones -/+ */}
                                             <div className="flex items-center gap-1">
                                                 <button
                                                     onClick={() =>
@@ -207,13 +245,9 @@ export default function CartModal({
                                                     <Plus size={14} />
                                                 </button>
                                             </div>
-
-                                            {/* Precio */}
                                             <span className="font-semibold text-green-600">
                                                 ${(item.product.precio * item.quantity).toLocaleString()}
                                             </span>
-
-                                            {/* Eliminar */}
                                             <button
                                                 onClick={() => confirmRemove(String(item.product.id))}
                                                 className="text-red-500 hover:text-red-700 ml-3"
@@ -225,7 +259,6 @@ export default function CartModal({
                                 ))}
                             </ul>
 
-                            {/* Totales */}
                             <div className="space-y-2 font-semibold bg-gray-50 rounded-xl p-4 shadow-inner mb-4">
                                 <div className="flex justify-between text-gray-700">
                                     <span>Subtotal</span>
@@ -233,7 +266,7 @@ export default function CartModal({
                                 </div>
                                 {serviceType === "domicilio" && (
                                     <div className="flex justify-between text-red-500">
-                                        <span>+ Domicilio</span>
+                                        <span>+ Domicilio ({deliveryFee === 3000 ? "Cerca" : "Lejos"})</span>
                                         <span>${deliveryFee.toLocaleString()}</span>
                                     </div>
                                 )}
@@ -247,9 +280,15 @@ export default function CartModal({
                                     <span>Total</span>
                                     <span>${total.toLocaleString()}</span>
                                 </div>
+
+                                {payment === "Efectivo" && cashAmount && (
+                                    <div className={`flex justify-between text-sm pt-2 border-t ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        <span>Cambio:</span>
+                                        <span>${change.toLocaleString()}</span>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Tipo de servicio - Ahora con 3 opciones */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     📍 Tipo de servicio
@@ -334,10 +373,15 @@ export default function CartModal({
                                         className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
                                     />
                                     {errors.location && <p className="text-red-500 text-xs mt-1">La dirección es requerida</p>}
+                                    {address && (
+                                        <p className="text-sm text-gray-600 mt-1">
+                                            Costo de envío: ${deliveryFee.toLocaleString()}
+                                            ({deliveryFee === 3000 ? "Zona cercana" : "Zona lejana"})
+                                        </p>
+                                    )}
                                 </div>
                             ) : null}
 
-                            {/* Propina con botón "Sin propina" */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     🙏 Agregar propina (opcional)
@@ -375,7 +419,6 @@ export default function CartModal({
                                 />
                             </div>
 
-                            {/* Formulario */}
                             <div className="space-y-3 mb-6">
                                 <div>
                                     <input
@@ -392,15 +435,28 @@ export default function CartModal({
                                     {errors.name && <p className="text-red-500 text-xs mt-1">El nombre es requerido</p>}
                                 </div>
 
-                                <textarea
-                                    placeholder="Instrucciones (ej: casa verde, segundo piso...)"
-                                    value={instructions}
-                                    onChange={(e) => setInstructions(e.target.value)}
-                                    className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                />
+                                <div>
+                                    <textarea
+                                        placeholder="Instrucciones especiales: (ej: hamburguesa sin cebolla, con mostaza, etc.)"
+                                        value={instructions}
+                                        onChange={(e) => setInstructions(e.target.value)}
+                                        className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                                        rows={3}
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Especifica aquí cualquier modificación o instrucción especial para tu pedido
+                                    </p>
+                                </div>
+
                                 <select
                                     value={payment}
-                                    onChange={(e) => setPayment(e.target.value)}
+                                    onChange={(e) => {
+                                        setPayment(e.target.value);
+                                        if (e.target.value !== "Efectivo") {
+                                            setCashAmount("");
+                                            setErrors({ ...errors, cash: false });
+                                        }
+                                    }}
                                     className="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-green-500 outline-none"
                                 >
                                     <option>Efectivo</option>
@@ -409,10 +465,40 @@ export default function CartModal({
                                     <option>Daviplata</option>
                                     <option>Llave</option>
                                 </select>
+
+                                {payment === "Efectivo" && (
+                                    <div>
+                                        <input
+                                            type="text"
+                                            placeholder="¿Con cuánto pagas? *"
+                                            value={cashAmount}
+                                            onChange={(e) => {
+                                                const formatted = formatCashInput(e.target.value);
+                                                setCashAmount(formatted);
+                                                if (errors.cash) setErrors({ ...errors, cash: false });
+                                            }}
+                                            className={`w-full border ${errors.cash ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
+                                        />
+                                        {errors.cash && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {!cashAmount ? "Debes indicar con cuánto pagas" : "El monto no cubre el total"}
+                                            </p>
+                                        )}
+                                        {cashAmount && change >= 0 && (
+                                            <p className="text-green-600 text-sm mt-1">
+                                                Cambio: ${change.toLocaleString()}
+                                            </p>
+                                        )}
+                                        {cashAmount && change < 0 && (
+                                            <p className="text-red-500 text-sm mt-1">
+                                                Faltan: ${(-change).toLocaleString()} para completar el pago
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        {/* Botones fijos en la parte inferior */}
                         <div className="flex-shrink-0 p-4 bg-white border-t border-gray-100">
                             <div className="flex flex-col gap-3">
                                 <a

@@ -111,7 +111,7 @@ export default function App() {
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
       {/* Header */}
-      <Header title="Jully Mar" subtitle="Menú Virtual • Sistema de Pedidos" />
+      <Header title="Demo" subtitle="Menú Virtual • Sistema de Pedidos" />
 
       {/* Main */}
       <main className="max-w-xl mx-auto pt-20">
