@@ -1,9 +1,20 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Trash2, Plus, Minus, MapPin, Utensils, ShoppingBag, Navigation, Map } from "lucide-react";
+import { X } from "lucide-react";
 import Swal from "sweetalert2";
 import type { CartItem } from "../App";
 import { mesasDisponibles, type Mesa } from "../data/mesas";
+
+// Componentes refactorizados
+import CartItemList from "./carrito/CartItemList";
+import ServiceTypeSelector from "./carrito/ServiceTypeSelector";
+import MesaSelector from "./carrito/MesaSelector";
+import AddressForm from "./carrito/AddressForm";
+import TipSelector from "./carrito/TipSelector";
+import CustomerInfo from "./carrito/CustomerInfo";
+import PaymentSection from "./carrito/PaymentSection";
+import CartActions from "./carrito/CartActions";
+import CartSummary from "./carrito/CartSummary";
 
 interface Props {
     open: boolean;
@@ -35,10 +46,12 @@ export default function CartModal({
     const [errors, setErrors] = useState({
         name: false,
         location: false,
-        cash: false
+        cash: false,
     });
-    // const [showMap, setShowMap] = useState(false);
-    const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [selectedLocation, setSelectedLocation] = useState<{
+        lat: number;
+        lng: number;
+    } | null>(null);
 
     if (!open) return null;
 
@@ -46,25 +59,47 @@ export default function CartModal({
         (sum, item) => sum + item.product.precio * item.quantity,
         0
     );
-
-    // Precio fijo de domicilio
     const deliveryFee = serviceType === "domicilio" ? 3000 : 0;
     const total = subtotal + deliveryFee + tip;
 
     const calculateChange = () => {
         if (payment !== "Efectivo" || !cashAmount) return 0;
-        const cash = parseInt(cashAmount.replace(/\D/g, '')) || 0;
+        const cash = parseInt(cashAmount.replace(/\D/g, "")) || 0;
         return cash - total;
     };
-
     const change = calculateChange();
+
+    const formatCashInput = (value: string) => {
+        const numericValue = value.replace(/[^\d,.]/g, "");
+        if (!numericValue) return "";
+        const number = parseInt(numericValue.replace(/\D/g, ""));
+        if (isNaN(number)) return "";
+        return number.toLocaleString();
+    };
+
+    const resetForm = () => {
+        setName("");
+        setAddress("");
+        setSelectedMesa(null);
+        setInstructions("");
+        setPayment("Efectivo");
+        setCashAmount("");
+        setTip(0);
+        setServiceType("mesa");
+        setErrors({ name: false, location: false, cash: false });
+        setSelectedLocation(null);
+    };
 
     const validateForm = () => {
         const newErrors = {
             name: !name.trim(),
-            location: serviceType === "domicilio" ? !address.trim() :
-                serviceType === "mesa" ? !selectedMesa : false,
-            cash: payment === "Efectivo" && (!cashAmount || change < 0)
+            location:
+                serviceType === "domicilio"
+                    ? !address.trim()
+                    : serviceType === "mesa"
+                        ? !selectedMesa
+                        : false,
+            cash: payment === "Efectivo" && (!cashAmount || change < 0),
         };
         setErrors(newErrors);
         return !newErrors.name && !newErrors.location && !newErrors.cash;
@@ -72,56 +107,52 @@ export default function CartModal({
 
     const handleWhatsAppClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
-
         if (!validateForm()) {
-            let errorMessage = "Por favor completa los siguientes campos:";
-            if (!name.trim()) errorMessage += "\n• Tu nombre";
-            if (serviceType === "domicilio" && !address.trim()) errorMessage += "\n• Dirección de entrega";
-            if (serviceType === "mesa" && !selectedMesa) errorMessage += "\n• Selecciona una mesa";
-            if (payment === "Efectivo" && (!cashAmount || change < 0)) {
-                errorMessage += "\n• Monto en efectivo suficiente para cubrir el total";
-            }
-
             Swal.fire({
                 title: "Campos requeridos",
-                text: errorMessage,
+                text: "Por favor completa los campos obligatorios",
                 icon: "warning",
                 confirmButtonColor: "#16a34a",
             });
             return;
         }
 
-        const locationInfo = serviceType === "domicilio"
-            ? `📍 Dirección: ${address}\n` +
-            (selectedLocation ? `🗺️ Ubicación: https://www.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}\n` : "")
-            : serviceType === "mesa"
-                ? `🍽️ Mesa: ${selectedMesa?.nombre}\n`
-                : `📦 Tipo: Para llevar\n`;
+        const locationInfo =
+            serviceType === "domicilio"
+                ? `📍 Dirección: ${address}\n${selectedLocation
+                    ? `🗺️ Ubicación: https://www.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}\n`
+                    : ""
+                }`
+                : serviceType === "mesa"
+                    ? `🍽️ Mesa: ${selectedMesa?.nombre}\n`
+                    : "📦 Tipo: Para llevar\n";
 
-        const deliveryInfo = serviceType === "domicilio"
-            ? `🚚 Domicilio: $${deliveryFee.toLocaleString()}\n` +
-            `ℹ️ Si la ubicación es muy lejana, el precio podría aumentar a $5000\n`
-            : "";
+        const deliveryInfo =
+            serviceType === "domicilio"
+                ? `🚚 Domicilio: $${deliveryFee.toLocaleString()}\n`
+                : "";
 
-        const paymentInfo = payment === "Efectivo"
-            ? `💵 Paga con: $${parseInt(cashAmount.replace(/\D/g, '')).toLocaleString()}\n` +
-            `🪙 Cambio: $${change.toLocaleString()}\n`
-            : `💳 Pago: ${payment}\n`;
+        const paymentInfo =
+            payment === "Efectivo"
+                ? `💵 Paga con: $${parseInt(
+                    cashAmount.replace(/\D/g, "")
+                ).toLocaleString()}\n🪙 Cambio: $${change.toLocaleString()}\n`
+                : `💳 Pago: ${payment}\n`;
 
         const message = encodeURIComponent(
-            `🛒 Nuevo pedido (${serviceType === "domicilio" ? "A domicilio" : serviceType === "mesa" ? "En el local" : "Para llevar"}):\n\n` +
-            `${items.map((i) => `• ${i.product.nombre} x${i.quantity}`).join("\n")}\n\n` +
-            `Subtotal: $${subtotal.toLocaleString()}\n` +
-            deliveryInfo +
-            (tip > 0 ? `🙏 Propina: $${tip.toLocaleString()}\n` : "") +
-            `TOTAL: $${total.toLocaleString()}\n\n` +
-            `👤 Nombre: ${name}\n` +
-            locationInfo +
-            `📝 Instrucciones especiales: ${instructions || "Ninguna"}\n` +
-            paymentInfo
+            `🛒 Nuevo pedido (${serviceType}):\n\n${items
+                .map((i) => `• ${i.product.nombre} x${i.quantity}`)
+                .join("\n")}\n\nSubtotal: $${subtotal.toLocaleString()}\n${deliveryInfo}${tip > 0 ? `🙏 Propina: $${tip.toLocaleString()}\n` : ""
+            }TOTAL: $${total.toLocaleString()}\n\n👤 Nombre: ${name}\n${locationInfo}📝 Instrucciones: ${instructions || "Ninguna"
+            }\n${paymentInfo}`
         );
 
-        window.open(`https://wa.me/573028645014?text=${message}`, '_blank');
+        // abrir WhatsApp
+        window.open(`https://wa.me/573028645014?text=${message}`, "_blank");
+
+        // limpiar después de enviar
+        onClear();
+        resetForm();
     };
 
     const confirmRemove = (id: string) => {
@@ -135,10 +166,7 @@ export default function CartModal({
             confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar",
         }).then((result) => {
-            if (result.isConfirmed) {
-                onRemove(id);
-                Swal.fire("Eliminado", "El producto fue quitado del carrito.", "success");
-            }
+            if (result.isConfirmed) onRemove(id);
         });
     };
 
@@ -154,439 +182,160 @@ export default function CartModal({
             cancelButtonText: "Cancelar",
         }).then((result) => {
             if (result.isConfirmed) {
-                onClear();
-                Swal.fire("Carrito vacío", "Se eliminaron todos los productos.", "success");
+                onClear(); // limpia productos
+                resetForm(); // limpia formulario
+                Swal.fire(
+                    "Carrito vacío",
+                    "Se eliminaron todos los productos.",
+                    "success"
+                );
             }
         });
     };
 
-    const handleServiceTypeChange = (type: ServiceType) => {
-        setServiceType(type);
-        setErrors({ ...errors, location: false });
-        setSelectedLocation(null);
-    };
-
-    const formatCashInput = (value: string) => {
-        const numericValue = value.replace(/[^\d,.]/g, '');
-        if (!numericValue) return '';
-        const number = parseInt(numericValue.replace(/\D/g, ''));
-        if (isNaN(number)) return '';
-        return number.toLocaleString();
-    };
-
-    // Función para obtener la ubicación actual del usuario
-    const getCurrentLocation = () => {
+    // 👇 función que maneja la ubicación con loader + cancelar
+    const getCurrentLocation = (
+        onSuccess: () => void,
+        onError: () => void
+    ): (() => void) | void => {
         if (!navigator.geolocation) {
-            Swal.fire({
-                title: "Geolocalización no soportada",
-                text: "Tu navegador no soporta la geolocalización",
-                icon: "error",
-                confirmButtonColor: "#16a34a",
-            });
+            Swal.fire("Error", "Tu navegador no soporta geolocalización", "error");
+            onError();
             return;
         }
 
-        Swal.fire({
-            title: "Obteniendo ubicación",
-            text: "Por favor permite el acceso a tu ubicación",
-            icon: "info",
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
+        const watcherId = navigator.geolocation.watchPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
                 setSelectedLocation({ lat: latitude, lng: longitude });
-                Swal.fire({
-                    title: "Ubicación obtenida",
-                    text: "Tu ubicación se ha guardado correctamente",
-                    icon: "success",
-                    confirmButtonColor: "#16a34a",
-                });
+                onSuccess();
+                navigator.geolocation.clearWatch(watcherId);
             },
-            (error) => {
-                console.error("Error obteniendo ubicación:", error);
-                Swal.fire({
-                    title: "Error",
-                    text: "No se pudo obtener tu ubicación. Asegúrate de haber permitido el acceso.",
-                    icon: "error",
-                    confirmButtonColor: "#16a34a",
-                });
-            }
+            (err) => {
+                console.error("Error obteniendo ubicación", err);
+                Swal.fire("Error", "No se pudo obtener ubicación", "error");
+                onError();
+                navigator.geolocation.clearWatch(watcherId);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
+
+        // devolvemos función de cancelación
+        return () => {
+            navigator.geolocation.clearWatch(watcherId);
+        };
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+            {/* Overlay */}
 
+            {/* Modal */}
             <motion.div
                 drag="y"
                 dragConstraints={{ top: 0, bottom: 300 }}
-                onDragEnd={(_, info) => {
-                    if (info.offset.y > 100) onClose();
-                }}
+                onDragEnd={(_, info) => info.offset.y > 100 && onClose()}
                 initial={{ y: 200, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="relative w-full md:max-w-md bg-white rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col"
-                style={{
-                    height: 'min(90vh, 700px)',
-                    minHeight: '60vh'
-                }}
+                className=" w-full bg-white shadow-2xl flex flex-col
+        fixed bottom-0 left-0 right-0 h-[90vh] rounded-t-3xl 
+        md:static md:h-auto md:max-w-md md:rounded-3xl md:max-h-[700px]
+      "
             >
-                <div className="flex-shrink-0 p-4 border-b border-gray-100">
-                    <div className="md:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
+                {/* Header */}
+                <div className="flex-shrink-0 p-4 border-b border-gray-200">
                     <button
                         onClick={onClose}
-                        className="hidden md:block absolute right-5 top-5 text-gray-500 hover:text-gray-700"
+                        className="hidden md:block absolute right-5 top-5 text-gray-500"
                     >
                         <X size={24} />
                     </button>
-                    <h2 className="text-2xl font-bold text-gray-900">🛍️ Tu pedido</h2>
+                    <h2 className="text-2xl font-bold">🛍️ Tu pedido</h2>
                 </div>
 
+                {/* Body */}
                 {items.length === 0 ? (
                     <div className="flex-1 flex items-center justify-center">
-                        <p className="text-gray-600 text-center">Tu carrito está vacío 🍽️</p>
+                        <p className="text-gray-600">Tu carrito está vacío 🍽️</p>
                     </div>
                 ) : (
                     <>
                         <div className="flex-1 overflow-y-auto px-4 py-2">
-                            <ul className="rounded-xl bg-gray-50 mb-4">
-                                {items.map((item) => (
-                                    <li
-                                        key={item.product.id}
-                                        className="flex justify-between items-center py-3 px-3"
-                                    >
-                                        <div>
-                                            <span className="font-medium text-gray-900">{item.product.nombre}</span>
-                                            <span className="ml-1 text-sm text-gray-500">x{item.quantity}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={() =>
-                                                        onUpdateQuantity(String(item.product.id), item.quantity - 1)
-                                                    }
-                                                    className="p-1 bg-gray-200 rounded-full hover:bg-gray-300"
-                                                >
-                                                    <Minus size={14} />
-                                                </button>
-                                                <span className="px-2">{item.quantity}</span>
-                                                <button
-                                                    onClick={() =>
-                                                        onUpdateQuantity(String(item.product.id), item.quantity + 1)
-                                                    }
-                                                    className="p-1 bg-green-600 text-white rounded-full hover:bg-green-700"
-                                                >
-                                                    <Plus size={14} />
-                                                </button>
-                                            </div>
-                                            <span className="font-semibold text-green-600">
-                                                ${(item.product.precio * item.quantity).toLocaleString()}
-                                            </span>
-                                            <button
-                                                onClick={() => confirmRemove(String(item.product.id))}
-                                                className="text-red-500 hover:text-red-700 ml-3"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
+                            {/* aquí van tus componentes internos */}
+                            <CartItemList
+                                items={items}
+                                onUpdateQuantity={onUpdateQuantity}
+                                onRemove={confirmRemove}
+                            />
 
-                            <div className="space-y-2 font-semibold bg-gray-50 rounded-xl p-4 shadow-inner mb-4">
-                                <div className="flex justify-between text-gray-700">
-                                    <span>Subtotal</span>
-                                    <span>${subtotal.toLocaleString()}</span>
-                                </div>
-                                {serviceType === "domicilio" && (
-                                    <div className="flex justify-between text-red-500">
-                                        <span>+ Domicilio</span>
-                                        <span>${deliveryFee.toLocaleString()}</span>
-                                    </div>
-                                )}
-                                {tip > 0 && (
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>+ Propina</span>
-                                        <span>${tip.toLocaleString()}</span>
-                                    </div>
-                                )}
-                                <div className="flex justify-between text-lg text-gray-900">
-                                    <span>Total</span>
-                                    <span>${total.toLocaleString()}</span>
-                                </div>
+                            <CartSummary
+                                subtotal={subtotal}
+                                deliveryFee={deliveryFee}
+                                tip={tip}
+                                total={total}
+                                payment={payment}
+                                cashAmount={cashAmount}
+                                change={change}
+                            />
 
-                                {payment === "Efectivo" && cashAmount && (
-                                    <div className={`flex justify-between text-sm pt-2 border-t ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        <span>Cambio:</span>
-                                        <span>${change.toLocaleString()}</span>
-                                    </div>
-                                )}
-                            </div>
+                            <ServiceTypeSelector
+                                serviceType={serviceType}
+                                onChange={(t) => {
+                                    setServiceType(t);
+                                    setErrors({ ...errors, location: false });
+                                }}
+                            />
 
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    📍 Tipo de servicio
-                                </label>
-                                <div className="grid grid-cols-3 gap-2 mb-4">
-                                    <button
-                                        onClick={() => handleServiceTypeChange("mesa")}
-                                        className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "mesa"
-                                            ? "bg-green-600 text-white"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                            }`}
-                                    >
-                                        <Utensils size={16} />
-                                        En local
-                                    </button>
-                                    <button
-                                        onClick={() => handleServiceTypeChange("domicilio")}
-                                        className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "domicilio"
-                                            ? "bg-green-600 text-white"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                            }`}
-                                    >
-                                        <MapPin size={16} />
-                                        Domicilio
-                                    </button>
-                                    <button
-                                        onClick={() => handleServiceTypeChange("paraLlevar")}
-                                        className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition ${serviceType === "paraLlevar"
-                                            ? "bg-green-600 text-white"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                            }`}
-                                    >
-                                        <ShoppingBag size={16} />
-                                        Para llevar
-                                    </button>
-                                </div>
-                            </div>
-
-                            {serviceType === "mesa" ? (
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        🍽️ Selecciona tu mesa
-                                    </label>
-                                    <select
-                                        value={selectedMesa?.id || ""}
-                                        onChange={(e) => {
-                                            const mesa = mesasDisponibles.find(m => m.id === e.target.value);
-                                            if (mesa && mesa.disponible) {
-                                                setSelectedMesa(mesa);
-                                                if (errors.location) setErrors({ ...errors, location: false });
-                                            }
-                                        }}
-                                        className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
-                                    >
-                                        <option value="">Selecciona una mesa</option>
-                                        {mesasDisponibles.map((mesa) => (
-                                            <option key={mesa.id} value={mesa.id} disabled={!mesa.disponible}>
-                                                {mesa.nombre} {mesa.disponible ? "" : "✗"}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.location && <p className="text-red-500 text-xs mt-2">Debes seleccionar una mesa</p>}
-                                    {selectedMesa && (
-                                        <p className="text-green-600 text-sm mt-2">
-                                            Mesa seleccionada: <strong>{selectedMesa.nombre}</strong>
-                                        </p>
-                                    )}
-                                </div>
-                            ) : serviceType === "domicilio" ? (
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        📍 Dirección de entrega *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ingresa tu dirección completa"
-                                        value={address}
-                                        onChange={(e) => {
-                                            setAddress(e.target.value);
-                                            if (errors.location) setErrors({ ...errors, location: false });
-                                        }}
-                                        className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none mb-2`}
-                                    />
-
-                                    <div className="mb-2">
-                                        <button
-                                            onClick={getCurrentLocation}
-                                            className="w-full flex items-center justify-center gap-2 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition"
-                                        >
-                                            <Navigation size={16} />
-                                            Obtener mi ubicación automáticamente
-                                        </button>
-                                        <p className="text-xs text-gray-500 mt-1 text-center">
-                                            Opcional: Comparte tu ubicación para facilitar la entrega
-                                        </p>
-                                    </div>
-
-                                    {selectedLocation && (
-                                        <div className="bg-green-50 p-3 rounded-lg mb-2">
-                                            <p className="text-green-700 text-sm flex items-center gap-2">
-                                                <Map size={16} />
-                                                <span>Ubicación guardada: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}</span>
-                                            </p>
-                                            <p className="text-xs text-green-600 mt-1">
-                                                El domiciliario recibirá un enlace para abrir en Maps/Waze
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {errors.location && <p className="text-red-500 text-xs mt-1">La dirección es requerida</p>}
-                                    <p className="text-sm text-gray-600 mt-1">
-                                        Costo de envío: ${deliveryFee.toLocaleString()} (Si la ubicación es muy lejana, el precio podría aumentar a $5000)
-                                    </p>
-                                </div>
-                            ) : null}
-
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    🙏 Agregar propina (opcional)
-                                </label>
-                                <div className="flex gap-2 mb-2">
-                                    <button
-                                        onClick={() => setTip(0)}
-                                        className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${tip === 0
-                                            ? "bg-green-600 text-white border-green-600"
-                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                            }`}
-                                    >
-                                        Sin propina
-                                    </button>
-                                    {[1000, 2000, 5000].map((val) => (
-                                        <button
-                                            key={val}
-                                            onClick={() => setTip(val)}
-                                            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${tip === val
-                                                ? "bg-green-600 text-white border-green-600"
-                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                                }`}
-                                        >
-                                            +${val.toLocaleString()}
-                                        </button>
-                                    ))}
-                                </div>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    placeholder="Otra cantidad"
-                                    value={tip || ""}
-                                    onChange={(e) => setTip(Number(e.target.value) || 0)}
-                                    className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                            {serviceType === "mesa" && (
+                                <MesaSelector
+                                    selectedMesa={selectedMesa}
+                                    mesas={mesasDisponibles}
+                                    error={errors.location}
+                                    onSelect={setSelectedMesa}
                                 />
-                            </div>
+                            )}
 
-                            <div className="space-y-3 mb-6">
-                                <div>
-                                    <input
-                                        type="text"
-                                        placeholder="Tu nombre *"
-                                        value={name}
-                                        onChange={(e) => {
-                                            setName(e.target.value);
-                                            if (errors.name) setErrors({ ...errors, name: false });
-                                        }}
-                                        className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
-                                        required
-                                    />
-                                    {errors.name && <p className="text-red-500 text-xs mt-1">El nombre es requerido</p>}
-                                </div>
+                            {serviceType === "domicilio" && (
+                                <AddressForm
+                                    address={address}
+                                    setAddress={setAddress}
+                                    selectedLocation={selectedLocation}
+                                    deliveryFee={deliveryFee}
+                                    error={errors.location}
+                                    onGetLocation={getCurrentLocation}
+                                />
+                            )}
 
-                                <div>
-                                    <textarea
-                                        placeholder="Instrucciones especiales: (ej: hamburguesa sin cebolla, con mostaza, etc.)"
-                                        value={instructions}
-                                        onChange={(e) => setInstructions(e.target.value)}
-                                        className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                        rows={3}
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Especifica aquí cualquier modificación o instrucción especial para tu pedido
-                                    </p>
-                                </div>
+                            <TipSelector tip={tip} setTip={setTip} />
 
-                                <select
-                                    value={payment}
-                                    onChange={(e) => {
-                                        setPayment(e.target.value);
-                                        if (e.target.value !== "Efectivo") {
-                                            setCashAmount("");
-                                            setErrors({ ...errors, cash: false });
-                                        }
-                                    }}
-                                    className="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-green-500 outline-none"
-                                >
-                                    <option>Efectivo</option>
-                                    <option>Tarjeta</option>
-                                    <option>Nequi</option>
-                                    <option>Daviplata</option>
-                                    <option>Llave</option>
-                                </select>
+                            <CustomerInfo
+                                name={name}
+                                setName={setName}
+                                instructions={instructions}
+                                setInstructions={setInstructions}
+                                error={errors.name}
+                            />
 
-                                {payment === "Efectivo" && (
-                                    <div>
-                                        <input
-                                            type="text"
-                                            placeholder="¿Con cuánto pagas? *"
-                                            value={cashAmount}
-                                            onChange={(e) => {
-                                                const formatted = formatCashInput(e.target.value);
-                                                setCashAmount(formatted);
-                                                if (errors.cash) setErrors({ ...errors, cash: false });
-                                            }}
-                                            className={`w-full border ${errors.cash ? 'border-red-500' : 'border-gray-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none`}
-                                        />
-                                        {errors.cash && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {!cashAmount ? "Debes indicar con cuánto pagas" : "El monto no cubre el total"}
-                                            </p>
-                                        )}
-                                        {cashAmount && change >= 0 && (
-                                            <p className="text-green-600 text-sm mt-1">
-                                                Cambio: ${change.toLocaleString()}
-                                            </p>
-                                        )}
-                                        {cashAmount && change < 0 && (
-                                            <p className="text-red-500 text-sm mt-1">
-                                                Faltan: ${(-change).toLocaleString()} para completar el pago
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                            <PaymentSection
+                                payment={payment}
+                                setPayment={setPayment}
+                                cashAmount={cashAmount}
+                                setCashAmount={setCashAmount}
+                                change={change}
+                                error={errors.cash}
+                                formatCashInput={formatCashInput}
+                            />
                         </div>
 
-                        <div className="flex-shrink-0 p-4 bg-white border-t border-gray-100">
-                            <div className="flex flex-col gap-3">
-                                <a
-                                    href="#"
-                                    onClick={handleWhatsAppClick}
-                                    className="block bg-green-600 hover:bg-green-700 transition text-white text-center py-3 rounded-xl font-semibold shadow-lg"
-                                >
-                                    {serviceType === "domicilio"
-                                        ? "Pedir a domicilio"
-                                        : serviceType === "mesa"
-                                            ? "Pedir en local"
-                                            : "Pedir para llevar"}
-                                </a>
-                                <button
-                                    onClick={confirmClear}
-                                    className="block bg-gray-200 hover:bg-gray-300 transition text-gray-700 text-center py-3 rounded-xl font-semibold"
-                                >
-                                    Vaciar carrito
-                                </button>
-                            </div>
-                        </div>
+                        <CartActions
+                            serviceType={serviceType}
+                            onWhatsAppClick={handleWhatsAppClick}
+                            onClear={confirmClear}
+                        />
                     </>
                 )}
             </motion.div>
         </div>
     );
+
 }
